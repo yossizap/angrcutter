@@ -21,6 +21,10 @@ class RegistersTable(QTableWidget):
 
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
+        cutter.core().registersChanged.connect(self.updateContents)
+
+        self.updateContents()
+
     def contextMenuEvent(self, event):
         action = self.contextMenu.exec_(self.viewport().mapToGlobal(event.pos()))
         if action == self.regAction and cutter.core().currentlyDebugging:

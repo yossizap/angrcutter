@@ -14,14 +14,22 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
         try:
             super(AngrWidget, self).__init__(parent, action)
             register_debugger(cutterDebugger())
-            self.stateManager = None
+            self.stateMgr = None
             self.main = parent
+
+            self.find_addr = -1
+            self.avoid_addr = -1
 
             self.setObjectName("angr_cutter")
             self.setWindowTitle("AngrCutter")
 
             self.setupLayout()
             self.show()
+
+            self.startButton.clicked.connect(self.startExplore)
+            self.startButton.setDisabled(True)
+            self.stopButton.setDisabled(True)
+            self.viewRegisters.setDisabled(True)
 
             cutter.core().toggleDebugView.connect(self.debugStateChanged)
 
@@ -32,33 +40,40 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
         self.setupUi(self)
 
         self.viewRegisters = RegistersTable(self)
-        self.horizontalLayout.addWidget(self.viewRegisters)
+        self.regTableBox.addWidget(self.viewRegisters)
 
-        self.disassemblyWidget = cutter.DisassemblyWidget(None)
-
-        self.disassemblyWidget.setObjectName("angr_disasm")
-        self.disassemblyWidget.setPreviewMode(True)
-        self.disassemblyWidget.setWindowTitle("Disassembly View")
-        self.disassemblyWidget.setMinimumSize(QtCore.QSize(500, 500))
-        self.horizontalLayout.addWidget(self.disassemblyWidget)
-
-        finalAddrAction = QAction("Angr - set final address", self)
-        finalAddrAction.setCheckable(True)
+        findAddrAction = QAction("Angr - set find address", self)
         avoidAddrAction = QAction("Angr - set avoid address", self)
-        avoidAddrAction.setCheckable(True)
-        cutter.core().addContextMenuAction(cutter.CutterCore.ContextMenuType.Disassembly, finalAddrAction)
-        cutter.core().addContextMenuAction(cutter.CutterCore.ContextMenuType.Disassembly, avoidAddrAction)
 
-        cutter.core().registersChanged.connect(self.updateContents)
+        cutter.core().addContextMenuExtensionAction(
+                cutter.CutterCore.ContextMenuType.Disassembly, findAddrAction)
+        cutter.core().addContextMenuExtensionAction(
+                cutter.CutterCore.ContextMenuType.Disassembly, avoidAddrAction)
+        cutter.core().addContextMenuExtensionSeparator(
+                cutter.CutterCore.ContextMenuType.Disassembly)
 
-        self.updateContents()
+        findAddrAction.triggered.connect(self.setfindAddr)
+        avoidAddrAction.triggered.connect(self.setAvoidAddr)
 
-    def updateContents(self):
-        self.viewRegisters.updateContents()
+    def setfindAddr(self):
+        self.find_addr = cutter.core().getOffset()
+        self.findLine.setText(hex(self.find_addr))
+
+    def setAvoidAddr(self):
+        self.avoid_addr = cutter.core().getOffset()
+        self.avoidLine.setText(hex(self.avoid_addr))
+
+    def startExplore(self):
+        pass
     
     def debugStateChanged(self):
         if cutter.core().currentlyDebugging:
-            self.stateManager = StateManager()
+            disableUi = False
         else:
-            del self.stateManager
-            self.stateManager = None
+            del self.stateMgr
+            self.stateMgr = None
+            disableUi = True
+
+        self.startButton.setDisabled(disableUi)
+        self.stopButton.setDisabled(disableUi)
+        self.viewRegisters.setDisabled(disableUi)
