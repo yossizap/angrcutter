@@ -44,16 +44,28 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
     def setupActions(self):
         findAddrAction = QAction("Angr - set find address", self)
         avoidAddrAction = QAction("Angr - set avoid address", self)
+        unsetAddrAction = QAction("Angr - unset address", self)
 
         cutter.core().addContextMenuExtensionAction(
                 cutter.CutterCore.ContextMenuType.Disassembly, findAddrAction)
         cutter.core().addContextMenuExtensionAction(
                 cutter.CutterCore.ContextMenuType.Disassembly, avoidAddrAction)
+        cutter.core().addContextMenuExtensionAction(
+                cutter.CutterCore.ContextMenuType.Disassembly, unsetAddrAction)
         cutter.core().addContextMenuExtensionSeparator(
                 cutter.CutterCore.ContextMenuType.Disassembly)
 
         findAddrAction.triggered.connect(self.setFindAddr)
         avoidAddrAction.triggered.connect(self.setAvoidAddr)
+
+    def unsetAddr(self):
+        offset = cutter.core().getOffset()
+        if offset in self.find_addr:
+            self.find_addr.remove(offset)
+            self.updateFindAddrLine()
+        if offset in self.avoid_addr:
+            self.avoid_addr.remove(offset)
+            self.updateAvoidAddrLine()
 
     def setFindAddr(self):
         offset = cutter.core().getOffset()
