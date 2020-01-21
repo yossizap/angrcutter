@@ -82,19 +82,41 @@ class Ui_AngrWidget(object):
 
         self.gridLayout.addWidget(self.avoidLine, 1, 1, 1, 1)
 
+        self.memoryLabel = QLabel(self.dockWidgetContents)
+        self.memoryLabel.setObjectName(u"memoryLabel")
+        sizePolicy.setHeightForWidth(self.memoryLabel.sizePolicy().hasHeightForWidth())
+        self.memoryLabel.setSizePolicy(sizePolicy)
+        self.memoryLabel.setMidLineWidth(4)
+
+        self.gridLayout.addWidget(self.memoryLabel, 2, 0, 1, 1)
+
+        self.memoryCombo = QComboBox(self.dockWidgetContents)
+        self.memoryCombo.addItem("")
+        self.memoryCombo.addItem("")
+        self.memoryCombo.addItem("")
+        self.memoryCombo.addItem("")
+        self.memoryCombo.setObjectName(u"memoryCombo")
+
+        self.gridLayout.addWidget(self.memoryCombo, 2, 1, 1, 1)
+
         self.startButton = QPushButton(self.dockWidgetContents)
         self.startButton.setObjectName(u"startButton")
 
-        self.gridLayout.addWidget(self.startButton, 2, 0, 1, 1)
+        self.gridLayout.addWidget(self.startButton, 3, 0, 1, 1)
 
         self.stopButton = QPushButton(self.dockWidgetContents)
         self.stopButton.setObjectName(u"stopButton")
 
-        self.gridLayout.addWidget(self.stopButton, 3, 0, 1, 1)
+        self.gridLayout.addWidget(self.stopButton, 4, 0, 1, 1)
+
+        self.applySimButton = QPushButton(self.dockWidgetContents)
+        self.applySimButton.setObjectName(u"applySimButton")
+
+        self.gridLayout.addWidget(self.applySimButton, 5, 0, 1, 1)
 
         self.verticalSpacer = QSpacerItem(20, 400, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
-        self.gridLayout.addItem(self.verticalSpacer, 4, 0, 1, 1)
+        self.gridLayout.addItem(self.verticalSpacer, 6, 0, 1, 1)
 
 
         self.horizontalLayout.addLayout(self.gridLayout)
@@ -112,7 +134,17 @@ class Ui_AngrWidget(object):
     def retranslateUi(self, AngrWidget):
         self.findLabel.setText(QCoreApplication.translate("AngrWidget", u"Find address:", None))
         self.avoidLabel.setText(QCoreApplication.translate("AngrWidget", u"Avoid address:", None))
+        self.memoryLabel.setText(QCoreApplication.translate("AngrWidget", u"Memory type:", None))
+#if QT_CONFIG(tooltip)
+        self.memoryLabel.setToolTip(QCoreApplication.translate("AngrWidget", u"The memory type defines how angr gets the memory from the debug session and from the CLE backend", None))
+#endif // QT_CONFIG(tooltip)
+        self.memoryCombo.setItemText(0, QCoreApplication.translate("AngrWidget", u"CLE Simprocedures", None))
+        self.memoryCombo.setItemText(1, QCoreApplication.translate("AngrWidget", u"CLE GOT", None))
+        self.memoryCombo.setItemText(2, QCoreApplication.translate("AngrWidget", u"CLE Memory", None))
+        self.memoryCombo.setItemText(3, QCoreApplication.translate("AngrWidget", u"Debugger Memory", None))
+
         self.startButton.setText(QCoreApplication.translate("AngrWidget", u"Start", None))
         self.stopButton.setText(QCoreApplication.translate("AngrWidget", u"Stop", None))
+        self.applySimButton.setText(QCoreApplication.translate("AngrWidget", u"Apply simulation results", None))
     # retranslateUi
 

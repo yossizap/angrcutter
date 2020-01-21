@@ -23,24 +23,31 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
             self.setObjectName("angr_cutter")
             self.setWindowTitle("AngrCutter")
 
-            self.setupUi(self)
-
-            self.viewRegisters = RegistersTable(self)
-            self.regTableBox.addWidget(self.viewRegisters)
-
+            self.setupLayout()
             self.show()
 
             self.setupActions()
 
             self.startButton.clicked.connect(self.startExplore)
-            self.startButton.setDisabled(True)
-            self.stopButton.setDisabled(True)
-
+            self.applySimButton.clicked.connect(self.applySim)
             cutter.core().toggleDebugView.connect(self.debugStateChanged)
 
         except Exception as e:
             print("[angr-cutter]: " + traceback.format_exc())
-    
+
+    def setupLayout(self):
+        self.setupUi(self)
+
+        self.viewRegisters = RegistersTable(self)
+        self.regTableBox.addWidget(self.viewRegisters)
+
+        self.startButton.setDisabled(True)
+        self.stopButton.setDisabled(True)
+        self.applySimButton.setDisabled(True)
+
+        self.memoryCombo.setCurrentIndex(get_memory_type())
+        self.memoryCombo.currentIndexChanged.connect(self.setMemoryType)
+
     def setupActions(self):
         findAddrAction = QAction("Angr - set find address", self)
         avoidAddrAction = QAction("Angr - set avoid address", self)
@@ -75,7 +82,7 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
             return
         self.find_addr.append(offset)
         self.updateFindAddrLine()
-        cutter.cmd("ecHi green @ %d" % offset)
+        cutter.cmd("ecHi blue @ %d" % offset)
 
     def setAvoidAddr(self):
         offset = cutter.core().getOffset()
@@ -84,13 +91,19 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
             return
         self.avoid_addr.append(offset)
         self.updateAvoidAddrLine()
-        cutter.cmd("ecHi blue @ %d" % offset)
+        cutter.cmd("ecHi yellow @ %d" % offset)
+
+    def setMemoryType(self):
+        set_memory_type(self.memoryCombo.currentIndex())
 
     def updateFindAddrLine(self):
         self.findLine.setText(",".join([hex(addr) for addr in self.find_addr]))
 
     def updateAvoidAddrLine(self):
         self.avoidLine.setText(",".join([hex(addr) for addr in self.avoid_addr]))
+
+    def applySim(self):
+        self.simMgr.to_dbg(self.simMgr.found[0])
 
     def startExplore(self):
         if len(self.find_addr) == 0:
@@ -105,6 +118,7 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
         conc = self.stateMgr.concretize(self.simMgr.found[0])
         for addr in conc:
             print("0x%x ==> %s" % (addr, repr(conc[addr])))
+        self.applySimButton.setDisabled(False)
     
     def debugStateChanged(self):
         if cutter.core().currentlyDebugging:
@@ -113,6 +127,8 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
             del self.stateMgr
             self.stateMgr = None
             disableUi = True
+            # applySim can be enabled only after startExplore
+            self.applySimButton.setDisabled(True)
 
         self.startButton.setDisabled(disableUi)
         self.stopButton.setDisabled(disableUi)
