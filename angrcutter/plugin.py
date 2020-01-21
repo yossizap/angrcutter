@@ -66,6 +66,7 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
         if offset in self.avoid_addr:
             self.avoid_addr.remove(offset)
             self.updateAvoidAddrLine()
+        cutter.cmd("ecH- @ %d" % offset)
 
     def setFindAddr(self):
         offset = cutter.core().getOffset()
@@ -74,6 +75,7 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
             return
         self.find_addr.append(offset)
         self.updateFindAddrLine()
+        cutter.cmd("ecHi green @ %d" % offset)
 
     def setAvoidAddr(self):
         offset = cutter.core().getOffset()
@@ -82,6 +84,7 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
             return
         self.avoid_addr.append(offset)
         self.updateAvoidAddrLine()
+        cutter.cmd("ecHi blue @ %d" % offset)
 
     def updateFindAddrLine(self):
         self.findLine.setText(",".join([hex(addr) for addr in self.find_addr]))
