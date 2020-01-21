@@ -64,7 +64,17 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
         self.avoidLine.setText(hex(self.avoid_addr))
 
     def startExplore(self):
-        pass
+        if self.find_addr < 0:
+            print("[angr-cutter]: You have to set a find address to explore to")
+            return
+        print("[angr-cutter]: Starting exploration with find %d, avoid %d" % (self.find_addr, self.avoid_addr))
+        self.stateMgr = StateManager()
+        self.simMgr = self.stateMgr.simulation_manager()
+        self.simMgr.explore(find=self.find_addr, avoid=self.avoid_addr)
+        print("[angr-cutter]: Found: " + str(self.simMgr.found[0]))
+        conc = self.stateMgr.concretize(self.simMgr.found[0])
+        for addr in conc:
+            print("0x%x ==> %s" % (addr, repr(conc[addr])))
     
     def debugStateChanged(self):
         if cutter.core().currentlyDebugging:
