@@ -17,31 +17,31 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
             self.stateMgr = None
             self.main = parent
 
-            self.find_addr = -1
-            self.avoid_addr = -1
+            self.find_addr = []
+            self.avoid_addr = []
 
             self.setObjectName("angr_cutter")
             self.setWindowTitle("AngrCutter")
 
-            self.setupLayout()
+            self.setupUi(self)
+
+            self.viewRegisters = RegistersTable(self)
+            self.regTableBox.addWidget(self.viewRegisters)
+
             self.show()
+
+            self.setupActions()
 
             self.startButton.clicked.connect(self.startExplore)
             self.startButton.setDisabled(True)
             self.stopButton.setDisabled(True)
-            self.viewRegisters.setDisabled(True)
 
             cutter.core().toggleDebugView.connect(self.debugStateChanged)
 
         except Exception as e:
             print("[angr-cutter]: " + traceback.format_exc())
     
-    def setupLayout(self):
-        self.setupUi(self)
-
-        self.viewRegisters = RegistersTable(self)
-        self.regTableBox.addWidget(self.viewRegisters)
-
+    def setupActions(self):
         findAddrAction = QAction("Angr - set find address", self)
         avoidAddrAction = QAction("Angr - set avoid address", self)
 
@@ -52,22 +52,37 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
         cutter.core().addContextMenuExtensionSeparator(
                 cutter.CutterCore.ContextMenuType.Disassembly)
 
-        findAddrAction.triggered.connect(self.setfindAddr)
+        findAddrAction.triggered.connect(self.setFindAddr)
         avoidAddrAction.triggered.connect(self.setAvoidAddr)
 
-    def setfindAddr(self):
-        self.find_addr = cutter.core().getOffset()
-        self.findLine.setText(hex(self.find_addr))
+    def setFindAddr(self):
+        offset = cutter.core().getOffset()
+        if offset in self.avoid_addr or offset in self.find_addr:
+            print("[angr-cutter] Address %s was already set" % hex(offset))
+            return
+        self.find_addr.append(offset)
+        self.updateFindAddrLine()
 
     def setAvoidAddr(self):
-        self.avoid_addr = cutter.core().getOffset()
-        self.avoidLine.setText(hex(self.avoid_addr))
+        offset = cutter.core().getOffset()
+        if offset in self.avoid_addr or offset in self.find_addr:
+            print("[angr-cutter] Address %s was already set" % hex(offset))
+            return
+        self.avoid_addr.append(offset)
+        self.updateAvoidAddrLine()
+
+    def updateFindAddrLine(self):
+        self.findLine.setText(",".join([hex(addr) for addr in self.find_addr]))
+
+    def updateAvoidAddrLine(self):
+        self.avoidLine.setText(",".join([hex(addr) for addr in self.avoid_addr]))
 
     def startExplore(self):
-        if self.find_addr < 0:
+        if len(self.find_addr) == 0:
             print("[angr-cutter]: You have to set a find address to explore to")
             return
-        print("[angr-cutter]: Starting exploration with find %d, avoid %d" % (self.find_addr, self.avoid_addr))
+        print("[angr-cutter]: Starting exploration with find (%s) and avoid (%s)" %
+                (self.find_addr, self.avoid_addr,))
         self.stateMgr = StateManager()
         self.simMgr = self.stateMgr.simulation_manager()
         self.simMgr.explore(find=self.find_addr, avoid=self.avoid_addr)
@@ -86,4 +101,3 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
 
         self.startButton.setDisabled(disableUi)
         self.stopButton.setDisabled(disableUi)
-        self.viewRegisters.setDisabled(disableUi)
