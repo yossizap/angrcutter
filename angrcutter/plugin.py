@@ -90,6 +90,7 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
         if offset in self.symAddrs:
             del self.symAddrs[offset]
             self.updateSymAddrLine()
+
         cutter.cmd("ecH- @ %d" % offset)
 
     def setSymAddr(self):
@@ -98,7 +99,7 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
             print("[angr-cutter] Address %s was already set" % hex(offset))
             return
 
-        text, ok = QInputDialog.getText(self, "Symbolize address", "Size:")
+        text, ok = QInputDialog.getText(self, "Symbolize address", "Size(bytes):")
         if ok:
             size = int(text)
         else:
@@ -113,6 +114,7 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
         if offset in self.avoidAddrs or offset in self.findAddrs or offset in self.symAddrs:
             print("[angr-cutter] Address %s was already set" % hex(offset))
             return
+
         self.findAddrs.append(offset)
         self.updateFindAddrLine()
         cutter.cmd("ecHi blue @ %d" % offset)
@@ -122,6 +124,7 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
         if offset in self.avoidAddrs or offset in self.findAddrs or offset in self.symAddrs:
             print("[angr-cutter] Address %s was already set" % hex(offset))
             return
+
         self.avoidAddrs.append(offset)
         self.updateAvoidAddrLine()
         cutter.cmd("ecHi yellow @ %d" % offset)
@@ -141,30 +144,43 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
 
     def applySim(self):
         self.simMgr.to_dbg(self.simMgr.found[0])
+        # Synchronize all widgets with the applied memory/register values
+        cutter.core().refreshAll()
 
     def startExplore(self):
         if len(self.findAddrs) == 0:
             print("[angr-cutter]: You have to set a find address to explore to")
             return
-        print("[angr-cutter]: Starting exploration with find (%s) and avoid (%s)" %
-                (self.findAddrs, self.avoidAddrs,))
+
         self.stateMgr = StateManager()
         self.simMgr = self.stateMgr.simulation_manager()
+
+        # Configure symbolic memory addresses and registers
         for addr in self.symAddrs:
             self.stateMgr.sim(addr, self.symAddrs[addr])
+        for reg in self.viewRegisters.symRegs:
+            self.stateMgr.sim(self.stateMgr[reg], self.viewRegisters.symRegs[reg])
+
+        # Start exploration
+        print("[angr-cutter]: Starting exploration with find (%s) and avoid (%s)" %
+                (self.findAddrs, self.avoidAddrs,))
         self.simMgr.explore(find=self.findAddrs, avoid=self.avoidAddrs)
 
-        print("[angr-cutter]: Found: " + str(self.simMgr.found[0]))
-        conc = self.stateMgr.concretize(self.simMgr.found[0])
-        for addr in conc:
-            print("[angr-cutter] 0x%x ==> %s" % (addr, repr(conc[addr])))
-
+        # Attempt to print the results
         if len(self.simMgr.found):
+            print("[angr-cutter]: Found: " + str(self.simMgr.found[0]))
+
+            conc = self.stateMgr.concretize(self.simMgr.found[0])
+            for addr in conc:
+                print("[angr-cutter] 0x%x ==> %s" % (addr, repr(conc[addr])))
+
             self.applySimButton.setDisabled(False)
         else:
+            print("[angr-cutter]: Failed to find a state")
             self.applySimButton.setDisabled(True)
 
-        cutter.core().updateSeek()
+        # Synchronize displays
+        cutter.core().refreshAll()
     
     def debugStateChanged(self):
         if cutter.core().currentlyDebugging:

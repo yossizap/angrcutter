@@ -1,4 +1,5 @@
-from PySide2.QtWidgets import QAbstractItemView, QTableWidgetItem, QMenu, QTableWidget, QHeaderView, QAction
+from PySide2.QtWidgets import QAbstractItemView, QTableWidgetItem, QMenu, QTableWidget, QHeaderView, QAction, QInputDialog
+from PySide2.QtGui import QColor
 
 import cutter
 
@@ -6,11 +7,8 @@ class RegistersTable(QTableWidget):
     def __init__(self, parent=None):
         QTableWidget.__init__(self, parent)
         self.parent = parent
+        self.symRegs = {}
 
-        self.contextMenu = QMenu(self)
-        self.regAction = QAction("Emulate Register", self)
-        self.regAction.setCheckable(True)
-        self.emulateAction = self.contextMenu.addAction(self.regAction)
         self.setShowGrid(False)
         self.verticalHeader().hide()
         self.setColumnCount(2)
@@ -26,11 +24,31 @@ class RegistersTable(QTableWidget):
         self.updateContents()
 
     def contextMenuEvent(self, event):
-        action = self.contextMenu.exec_(self.viewport().mapToGlobal(event.pos()))
-        if action == self.regAction and cutter.core().currentlyDebugging:
-            row = self.rowAt(event.pos().y())
-            sm = self.parent.stateManager
-            key = sm.sim(sm[self.item(row, 0).text()], 100)
+        contextMenu = QMenu(self)
+        row = self.rowAt(event.pos().y())
+        reg = self.item(row, 0).text()
+        unsetRegAction = QAction("Cancel symbolization", self)
+        symRegAction = QAction("Symbolize Register", self)
+
+        if reg in self.symRegs:
+            contextMenu.addAction(unsetRegAction)
+        else:
+            contextMenu.addAction(symRegAction)
+
+        action = contextMenu.exec_(self.viewport().mapToGlobal(event.pos()))
+
+        if action == symRegAction:
+            text, ok = QInputDialog.getText(self, "Symbolize register", "Size(bytes):")
+            if ok:
+                size = int(text)
+            else:
+                size = 8
+
+            self.symRegs[reg] = size
+            self.updateContents()
+        elif action == unsetRegAction:
+            del self.symRegs[reg]
+            self.updateContents()
 
     def updateContents(self):
         try:
@@ -44,3 +62,8 @@ class RegistersTable(QTableWidget):
             self.insertRow(row_position)
             self.setItem(row_position, 0, QTableWidgetItem(reg))
             self.setItem(row_position, 1, QTableWidgetItem(str(value)))
+
+            if reg in self.symRegs:
+                # Color symbolic register in light blue
+                self.item(row_position, 0).setBackground(QColor(52, 152, 219))
+                self.item(row_position, 1).setBackground(QColor(52, 152, 219))
