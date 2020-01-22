@@ -34,12 +34,8 @@ class Ui_AngrWidget(object):
 
         self.horizontalLayout.addLayout(self.regTableBox)
 
-        self.gridLayout = QGridLayout()
-        self.gridLayout.setObjectName(u"gridLayout")
-        self.gridLayout.setSizeConstraint(QLayout.SetDefaultConstraint)
-        self.gridLayout.setHorizontalSpacing(8)
-        self.gridLayout.setVerticalSpacing(10)
-        self.gridLayout.setContentsMargins(-1, -1, 0, -1)
+        self.infoBox = QVBoxLayout()
+        self.infoBox.setObjectName(u"infoBox")
         self.findLabel = QLabel(self.dockWidgetContents)
         self.findLabel.setObjectName(u"findLabel")
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
@@ -49,7 +45,7 @@ class Ui_AngrWidget(object):
         self.findLabel.setSizePolicy(sizePolicy)
         self.findLabel.setMidLineWidth(4)
 
-        self.gridLayout.addWidget(self.findLabel, 0, 0, 1, 1)
+        self.infoBox.addWidget(self.findLabel)
 
         self.findLine = QLineEdit(self.dockWidgetContents)
         self.findLine.setObjectName(u"findLine")
@@ -62,7 +58,7 @@ class Ui_AngrWidget(object):
         self.findLine.setAlignment(Qt.AlignJustify|Qt.AlignVCenter)
         self.findLine.setReadOnly(True)
 
-        self.gridLayout.addWidget(self.findLine, 0, 1, 1, 1)
+        self.infoBox.addWidget(self.findLine)
 
         self.avoidLabel = QLabel(self.dockWidgetContents)
         self.avoidLabel.setObjectName(u"avoidLabel")
@@ -70,7 +66,7 @@ class Ui_AngrWidget(object):
         self.avoidLabel.setSizePolicy(sizePolicy)
         self.avoidLabel.setMidLineWidth(4)
 
-        self.gridLayout.addWidget(self.avoidLabel, 1, 0, 1, 1)
+        self.infoBox.addWidget(self.avoidLabel)
 
         self.avoidLine = QLineEdit(self.dockWidgetContents)
         self.avoidLine.setObjectName(u"avoidLine")
@@ -80,7 +76,25 @@ class Ui_AngrWidget(object):
         self.avoidLine.setAlignment(Qt.AlignJustify|Qt.AlignVCenter)
         self.avoidLine.setReadOnly(True)
 
-        self.gridLayout.addWidget(self.avoidLine, 1, 1, 1, 1)
+        self.infoBox.addWidget(self.avoidLine)
+
+        self.symLabel = QLabel(self.dockWidgetContents)
+        self.symLabel.setObjectName(u"symLabel")
+        sizePolicy.setHeightForWidth(self.symLabel.sizePolicy().hasHeightForWidth())
+        self.symLabel.setSizePolicy(sizePolicy)
+        self.symLabel.setMidLineWidth(4)
+
+        self.infoBox.addWidget(self.symLabel)
+
+        self.symLine = QLineEdit(self.dockWidgetContents)
+        self.symLine.setObjectName(u"symLine")
+        sizePolicy1.setHeightForWidth(self.symLine.sizePolicy().hasHeightForWidth())
+        self.symLine.setSizePolicy(sizePolicy1)
+        self.symLine.setFrame(True)
+        self.symLine.setAlignment(Qt.AlignJustify|Qt.AlignVCenter)
+        self.symLine.setReadOnly(True)
+
+        self.infoBox.addWidget(self.symLine)
 
         self.memoryLabel = QLabel(self.dockWidgetContents)
         self.memoryLabel.setObjectName(u"memoryLabel")
@@ -88,7 +102,7 @@ class Ui_AngrWidget(object):
         self.memoryLabel.setSizePolicy(sizePolicy)
         self.memoryLabel.setMidLineWidth(4)
 
-        self.gridLayout.addWidget(self.memoryLabel, 2, 0, 1, 1)
+        self.infoBox.addWidget(self.memoryLabel)
 
         self.memoryCombo = QComboBox(self.dockWidgetContents)
         self.memoryCombo.addItem("")
@@ -97,29 +111,29 @@ class Ui_AngrWidget(object):
         self.memoryCombo.addItem("")
         self.memoryCombo.setObjectName(u"memoryCombo")
 
-        self.gridLayout.addWidget(self.memoryCombo, 2, 1, 1, 1)
+        self.infoBox.addWidget(self.memoryCombo)
 
         self.startButton = QPushButton(self.dockWidgetContents)
         self.startButton.setObjectName(u"startButton")
 
-        self.gridLayout.addWidget(self.startButton, 3, 0, 1, 1)
+        self.infoBox.addWidget(self.startButton)
 
         self.stopButton = QPushButton(self.dockWidgetContents)
         self.stopButton.setObjectName(u"stopButton")
 
-        self.gridLayout.addWidget(self.stopButton, 4, 0, 1, 1)
+        self.infoBox.addWidget(self.stopButton)
 
         self.applySimButton = QPushButton(self.dockWidgetContents)
         self.applySimButton.setObjectName(u"applySimButton")
 
-        self.gridLayout.addWidget(self.applySimButton, 5, 0, 1, 1)
+        self.infoBox.addWidget(self.applySimButton)
 
         self.verticalSpacer = QSpacerItem(20, 400, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
-        self.gridLayout.addItem(self.verticalSpacer, 6, 0, 1, 1)
+        self.infoBox.addItem(self.verticalSpacer)
 
 
-        self.horizontalLayout.addLayout(self.gridLayout)
+        self.horizontalLayout.addLayout(self.infoBox)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -132,8 +146,9 @@ class Ui_AngrWidget(object):
     # setupUi
 
     def retranslateUi(self, AngrWidget):
-        self.findLabel.setText(QCoreApplication.translate("AngrWidget", u"Find address:", None))
-        self.avoidLabel.setText(QCoreApplication.translate("AngrWidget", u"Avoid address:", None))
+        self.findLabel.setText(QCoreApplication.translate("AngrWidget", u"Find addresses:", None))
+        self.avoidLabel.setText(QCoreApplication.translate("AngrWidget", u"Avoid addresses:", None))
+        self.symLabel.setText(QCoreApplication.translate("AngrWidget", u"Symbolic addresses:", None))
         self.memoryLabel.setText(QCoreApplication.translate("AngrWidget", u"Memory type:", None))
 #if QT_CONFIG(tooltip)
         self.memoryLabel.setToolTip(QCoreApplication.translate("AngrWidget", u"The memory type defines how angr gets the memory from the debug session and from the CLE backend", None))

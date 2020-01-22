@@ -33,19 +33,7 @@
       <layout class="QVBoxLayout" name="regTableBox"/>
      </item>
      <item>
-      <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0">
-       <property name="sizeConstraint">
-        <enum>QLayout::SetDefaultConstraint</enum>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="horizontalSpacing">
-        <number>8</number>
-       </property>
-       <property name="verticalSpacing">
-        <number>10</number>
-       </property>
+      <layout class="QVBoxLayout" name="infoBox">
        <item row="0" column="0">
         <widget class="QLabel" name="findLabel">
          <property name="sizePolicy">
@@ -58,7 +46,7 @@
           <number>4</number>
          </property>
          <property name="text">
-          <string>Find address:</string>
+          <string>Find addresses:</string>
          </property>
         </widget>
        </item>
@@ -93,7 +81,7 @@
           <number>4</number>
          </property>
          <property name="text">
-          <string>Avoid address:</string>
+          <string>Avoid addresses:</string>
          </property>
         </widget>
        </item>
@@ -117,6 +105,41 @@
         </widget>
        </item>
        <item row="2" column="0">
+        <widget class="QLabel" name="symLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="midLineWidth">
+          <number>4</number>
+         </property>
+         <property name="text">
+          <string>Symbolic addresses:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="symLine">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="frame">
+          <bool>true</bool>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignJustify|Qt::AlignVCenter</set>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
         <widget class="QLabel" name="memoryLabel">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -135,7 +158,7 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="1">
+       <item row="3" column="1">
         <widget class="QComboBox" name="memoryCombo">
          <item>
           <property name="text">
@@ -171,28 +194,28 @@
          </item>
         </widget>
        </item>
-       <item row="3" column="0">
+       <item row="4" column="0">
         <widget class="QPushButton" name="startButton">
          <property name="text">
           <string>Start</string>
          </property>
         </widget>
        </item>
-       <item row="4" column="0">
+       <item row="5" column="0">
         <widget class="QPushButton" name="stopButton">
          <property name="text">
           <string>Stop</string>
          </property>
         </widget>
        </item>
-       <item row="5" column="0">
+       <item row="6" column="0">
         <widget class="QPushButton" name="applySimButton">
          <property name="text">
           <string>Apply simulation results</string>
          </property>
         </widget>
        </item>
-       <item row="6" column="0">
+       <item row="7" column="0">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
