@@ -107,7 +107,7 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
 
         self.symAddrs[offset] = size
         self.updateSymAddrLine()
-        cutter.cmd("ecHi orange @ %d" % offset)
+        cutter.cmd("ecHi black @ %d" % offset)
 
     def setFindAddr(self):
         offset = int(self.findAddrAction.data())
@@ -132,6 +132,11 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
     def setMemoryType(self):
         set_memory_type(self.memoryCombo.currentIndex())
 
+    def update(self):
+        self.updateFindAddrLine()
+        self.updateAvoidAddrLine()
+        self.updateSymAddrLine()
+
     def updateFindAddrLine(self):
         self.findLine.setText(",".join([hex(addr) for addr in self.findAddrs]))
 
@@ -145,7 +150,7 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
     def applySim(self):
         self.simMgr.to_dbg(self.simMgr.found[0])
         # Synchronize all widgets with the applied memory/register values
-        cutter.core().refreshAll()
+        cutter.core().refreshAll.emit()
 
     def startExplore(self):
         if len(self.findAddrs) == 0:
@@ -164,6 +169,7 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
         # Start exploration
         print("[angr-cutter]: Starting exploration with find (%s) and avoid (%s)" %
                 (self.findAddrs, self.avoidAddrs,))
+        print("[angr-cutter] Symbolics are: " + str(self.stateMgr.symbolics))
         self.simMgr.explore(find=self.findAddrs, avoid=self.avoidAddrs)
 
         # Attempt to print the results
@@ -180,10 +186,12 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
             self.applySimButton.setDisabled(True)
 
         # Synchronize displays
-        cutter.core().refreshAll()
+        cutter.core().refreshAll.emit()
     
     def debugStateChanged(self):
         if cutter.core().currentlyDebugging:
+            self.baddr = int(cutter.cmd("e bin.baddr").strip('\n'), 16)
+            diff = self.baddr
             disableUi = False
         else:
             del self.stateMgr
@@ -191,6 +199,26 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
             disableUi = True
             # applySim can be enabled only after startExplore
             self.applySimButton.setDisabled(True)
-
+            diff = -self.baddr
+ 
+        # Enable exploration action when in debug mode
         self.startButton.setDisabled(disableUi)
         self.stopButton.setDisabled(disableUi)
+
+        # Rebase addresses
+        tmp = []
+        for addr in self.findAddrs:
+            tmp.append(addr + diff)
+        self.findAddrs = tmp
+
+        tmp = []
+        for addr in self.avoidAddrs:
+            tmp.append(addr + diff)
+        self.avoidAddrs = tmp
+ 
+        tmp = {}
+        for addr in self.symAddrs:
+            tmp[addr + diff] = self.symAddrs[addr]
+        self.symAddrs = tmp
+
+        self.update()
