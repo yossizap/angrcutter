@@ -32,10 +32,16 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
 
             self.startButton.clicked.connect(self.startExplore)
             self.applySimButton.clicked.connect(self.applySim)
+
             cutter.core().toggleDebugView.connect(self.debugStateChanged)
+            cutter.core().refreshAll.connect(self.refreshAll)
 
         except Exception as e:
             print("[angr-cutter]: " + traceback.format_exc())
+
+    def refreshAll(self):
+        # Update baddr in refreshall since it happens after analysis and file changes
+        self.baddr = int(cutter.cmd("e bin.baddr").strip('\n'), 16)
 
     def setupLayout(self):
         self.setupUi(self)
@@ -189,9 +195,12 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
         cutter.core().refreshAll.emit()
     
     def debugStateChanged(self):
+        # Calculate the diff based on the previous baddr
+        baddr = int(cutter.cmd("e bin.baddr").strip('\n'), 16)
+        diff = baddr - self.baddr
+        self.baddr = baddr
+
         if cutter.core().currentlyDebugging:
-            self.baddr = int(cutter.cmd("e bin.baddr").strip('\n'), 16)
-            diff = self.baddr
             disableUi = False
         else:
             del self.stateMgr
@@ -199,7 +208,6 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
             disableUi = True
             # applySim can be enabled only after startExplore
             self.applySimButton.setDisabled(True)
-            diff = -self.baddr
  
         # Enable exploration action when in debug mode
         self.startButton.setDisabled(disableUi)
