@@ -148,7 +148,7 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
             for addr in self.symAddrs]))
 
     def applySim(self):
-        self.simMgr.to_dbg(self.simMgr.found[0])
+        self.stateMgr.to_dbg(self.simMgr.found[0])
         # Synchronize all widgets with the applied memory/register values
         cutter.core().refreshAll.emit()
 
@@ -169,7 +169,7 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
         # Start exploration
         print("[angr-cutter]: Starting exploration with find (%s) and avoid (%s)" %
                 (self.findAddrs, self.avoidAddrs,))
-        print("[angr-cutter] Symbolics are: " + str(self.stateMgr.symbolics))
+        print("[angr-cutter]: Symbolics are: " + str(self.stateMgr.symbolics))
         self.simMgr.explore(find=self.findAddrs, avoid=self.avoidAddrs)
 
         # Attempt to print the results

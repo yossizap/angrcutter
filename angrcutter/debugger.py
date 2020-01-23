@@ -48,7 +48,7 @@ class cutterDebugger(Debugger):
         return cutter.core().currentlyDebugging
 
     def input_file(self):
-        path = cutter.core().currentlyOpenFile
+        path = cutter.core().currentlyOpenFile.rstrip()
         return open(path, "rb")
 
     def image_base(self):
