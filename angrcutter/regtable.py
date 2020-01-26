@@ -61,7 +61,7 @@ class RegistersTable(QTableWidget):
             row_position = self.rowCount()
             self.insertRow(row_position)
             self.setItem(row_position, 0, QTableWidgetItem(reg))
-            self.setItem(row_position, 1, QTableWidgetItem(str(value)))
+            self.setItem(row_position, 1, QTableWidgetItem(hex(value)))
 
             if reg in self.symRegs:
                 # Color symbolic register in light blue
