@@ -11,7 +11,8 @@ to find a solution that will reach this address
 - Right click 0x40060e (failure execution path) and select `Plugins -> Angr - set avoid addr`
 to avoid symboliclly executing code in this path during exploration
 - Right click `rax` in the angr widget to symbolize it since argv[1] is in it and verify is
-about to check it
+about to check it. This action will prompt you to set a size - set it to 100 to check
+values that are up to 100 bytes at the address that the register points to.
 - Click `Start` in the angr plugin and wait for the result to be printed in the console
 - Click `Apply simulation results` in the angr widget to change the value of `rax` to the
 correct key
