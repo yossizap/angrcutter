@@ -1,10 +1,11 @@
-from PySide2.QtWidgets import QAction, QInputDialog
+from PySide2.QtWidgets import QAction
 import PySide2.QtCore as QtCore
 
 import cutter
 from .autogen.angrcutter_ui import Ui_AngrWidget
 from .debugger import cutterDebugger
 from .regtable import RegistersTable
+from .symdialog import SymAddrDialog
 
 import os, traceback, json
 from angrdbg import *
@@ -105,11 +106,9 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
             print("[angr-cutter] Address %s was already set" % hex(offset))
             return
 
-        text, ok = QInputDialog.getText(self, "Symbolize address", "Size(bytes):")
-        if ok:
-            size = int(text)
-        else:
-            size = 8
+        dialog = SymAddrDialog()
+        dialog.exec_()
+        size = dialog.getSize()
 
         self.symAddrs[offset] = size
         self.updateSymAddrLine()

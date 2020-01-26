@@ -2,6 +2,7 @@ from PySide2.QtWidgets import QAbstractItemView, QTableWidgetItem, QMenu, QTable
 from PySide2.QtGui import QColor
 
 import cutter
+from .symdialog import SymAddrDialog
 
 class RegistersTable(QTableWidget):
     def __init__(self, parent=None):
@@ -38,11 +39,9 @@ class RegistersTable(QTableWidget):
         action = contextMenu.exec_(self.viewport().mapToGlobal(event.pos()))
 
         if action == symRegAction:
-            text, ok = QInputDialog.getText(self, "Symbolize register", "Size(bytes):")
-            if ok:
-                size = int(text)
-            else:
-                size = 8
+            dialog = SymAddrDialog()
+            dialog.exec_()
+            size = dialog.getSize()
 
             self.symRegs[reg] = size
             self.updateContents()
