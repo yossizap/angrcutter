@@ -27,7 +27,7 @@ context menu(Available in the Disassembly and Graph widget) and addressable cont
 when right clicking addresses in most widgets).
 
 ### Examples
-There are examples in the [example](example/) folder with short writeups.
+There are examples in the [examples](examples/) folder with short writeups.
 
 ### Installation
 Simply checkout or download the repository and copy the angrcutter folder to your cutter plugins directory ([locating the plugins directory](https://github.com/radareorg/cutter/blob/master/docs/source/plugins.rst#loading-and-overview)).
