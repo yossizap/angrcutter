@@ -19,7 +19,7 @@ and the [angr paper](https://www.cs.ucsb.edu/~vigna/publications/2016_SP_angrSoK
     <img src="resources/gui.png"/>
 </p>
 
-AngrCutter adds a widget that lets you start/stop exploration, enable register symbolization
+AngrCutter adds a self-explanatory widget that lets you start/stop exploration, enable register symbolization
 and apply the exploration's results in the current debug session.
 
 In addition to the widget, the plugin adds address interaction options to the disassembly
@@ -27,7 +27,7 @@ context menu(Available in the Disassembly and Graph widget) and addressable cont
 when right clicking addresses in most widgets).
 
 ### Examples
-There's are examples in the [example](example/) folder with short writeups.
+There are examples in the [example](example/) folder with short writeups.
 
 ### Installation
 Simply checkout or download the repository and copy the angrcutter folder to your cutter plugins directory ([locating the plugins directory](https://github.com/radareorg/cutter/blob/master/docs/source/plugins.rst#loading-and-overview)).
