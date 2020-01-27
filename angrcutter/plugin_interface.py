@@ -1,8 +1,9 @@
 import cutter
 
-from .plugin import AngrWidget
+from .plugin import AngrWidget, printMessage, LogLevel
 
 from PySide2.QtWidgets import QAction
+
 
 class angrCutterPlugin(cutter.CutterPlugin):
     name = 'angr-cutter'
@@ -22,8 +23,9 @@ class angrCutterPlugin(cutter.CutterPlugin):
     def terminate(self):
         pass
 
+
 def create_cutter_plugin():
     try:
         return angrCutterPlugin()
     except Exception as e:
-        print("[angr-cutter]: " + traceback.format_exc())
+        printMessage(traceback.format_exc(), LogLevel.ERROR)
