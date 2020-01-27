@@ -6,9 +6,29 @@ from .autogen.angrcutter_ui import Ui_AngrWidget
 from .debugger import cutterDebugger
 from .regtable import RegistersTable
 
-import os, traceback, json
+import os
+import traceback
+import json
+from enum import Enum
 from angrdbg import *
 import angr
+
+LOG_PREFIX = "[cutter-angr]"
+
+
+class LogLevel(Enum):
+    def __str__(self):
+        return str(self.value)
+
+    WARNING = "Warning"
+    ERROR = "Error"
+    INFO = "Info"
+
+
+def printMessage(message, level, prefix=LOG_PREFIX):
+    print("{prefix} {level}: {message}".format(
+        prefix=prefix, level=level, message=message))
+
 
 class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
     def __init__(self, parent, action):
@@ -37,7 +57,7 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
             cutter.core().refreshAll.connect(self.refreshAll)
 
         except Exception as e:
-            print("[angr-cutter]: " + traceback.format_exc())
+            printMessage(traceback.format_exc(), LogLevel.ERROR)
 
     def refreshAll(self):
         # Update baddr in refreshall since it happens after analysis and file changes
@@ -63,22 +83,22 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
         self.unsetAddrAction = QAction("Angr - unset address", self)
 
         cutter.core().addContextMenuExtensionAction(
-                cutter.CutterCore.ContextMenuType.Disassembly, self.findAddrAction)
+            cutter.CutterCore.ContextMenuType.Disassembly, self.findAddrAction)
         cutter.core().addContextMenuExtensionAction(
-                cutter.CutterCore.ContextMenuType.Disassembly, self.avoidAddrAction)
+            cutter.CutterCore.ContextMenuType.Disassembly, self.avoidAddrAction)
         cutter.core().addContextMenuExtensionAction(
-                cutter.CutterCore.ContextMenuType.Disassembly, self.symAddrAction)
+            cutter.CutterCore.ContextMenuType.Disassembly, self.symAddrAction)
         cutter.core().addContextMenuExtensionAction(
-                cutter.CutterCore.ContextMenuType.Disassembly, self.unsetAddrAction)
+            cutter.CutterCore.ContextMenuType.Disassembly, self.unsetAddrAction)
         cutter.core().addContextMenuExtensionSeparator(
-                cutter.CutterCore.ContextMenuType.Disassembly)
+            cutter.CutterCore.ContextMenuType.Disassembly)
 
         cutter.core().addContextMenuExtensionAction(
-                cutter.CutterCore.ContextMenuType.Addressable, self.symAddrAction)
+            cutter.CutterCore.ContextMenuType.Addressable, self.symAddrAction)
         cutter.core().addContextMenuExtensionAction(
-                cutter.CutterCore.ContextMenuType.Addressable, self.unsetAddrAction)
+            cutter.CutterCore.ContextMenuType.Addressable, self.unsetAddrAction)
         cutter.core().addContextMenuExtensionSeparator(
-                cutter.CutterCore.ContextMenuType.Addressable)
+            cutter.CutterCore.ContextMenuType.Addressable)
 
         self.findAddrAction.triggered.connect(self.setFindAddr)
         self.avoidAddrAction.triggered.connect(self.setAvoidAddr)
@@ -102,10 +122,12 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
     def setSymAddr(self):
         offset = int(self.symAddrAction.data())
         if offset in self.avoidAddrs or offset in self.findAddrs or offset in self.symAddrs:
-            print("[angr-cutter] Address %s was already set" % hex(offset))
+            printMessage("Address %s was already set" %
+                         hex(offset), LogLevel.WARNING)
             return
 
-        text, ok = QInputDialog.getText(self, "Symbolize address", "Size(bytes):")
+        text, ok = QInputDialog.getText(
+            self, "Symbolize address", "Size(bytes):")
         if ok:
             size = int(text)
         else:
@@ -118,7 +140,8 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
     def setFindAddr(self):
         offset = int(self.findAddrAction.data())
         if offset in self.avoidAddrs or offset in self.findAddrs or offset in self.symAddrs:
-            print("[angr-cutter] Address %s was already set" % hex(offset))
+            printMessage("Address %s was already set" %
+                         hex(offset), LogLevel.WARNING)
             return
 
         self.findAddrs.append(offset)
@@ -128,7 +151,8 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
     def setAvoidAddr(self):
         offset = int(self.avoidAddrAction.data())
         if offset in self.avoidAddrs or offset in self.findAddrs or offset in self.symAddrs:
-            print("[angr-cutter] Address %s was already set" % hex(offset))
+            printMessage("Address %s was already set" %
+                         hex(offset), LogLevel.WARNING)
             return
 
         self.avoidAddrs.append(offset)
@@ -147,11 +171,12 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
         self.findLine.setText(",".join([hex(addr) for addr in self.findAddrs]))
 
     def updateAvoidAddrLine(self):
-        self.avoidLine.setText(",".join([hex(addr) for addr in self.avoidAddrs]))
+        self.avoidLine.setText(
+            ",".join([hex(addr) for addr in self.avoidAddrs]))
 
     def updateSymAddrLine(self):
         self.symLine.setText(",".join([hex(addr) + '-' + hex(addr + self.symAddrs[addr])
-            for addr in self.symAddrs]))
+                                       for addr in self.symAddrs]))
 
     def applySim(self):
         self.stateMgr.to_dbg(self.simMgr.found[0])
@@ -160,7 +185,8 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
 
     def startExplore(self):
         if len(self.findAddrs) == 0:
-            print("[angr-cutter]: You have to set a find address to explore to")
+            printMessage(
+                "You have to set a find address to explore to", LogLevel.WARNING)
             return
 
         self.stateMgr = StateManager()
@@ -170,30 +196,33 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
         for addr in self.symAddrs:
             self.stateMgr.sim(addr, self.symAddrs[addr])
         for reg in self.viewRegisters.symRegs:
-            self.stateMgr.sim(self.stateMgr[reg], self.viewRegisters.symRegs[reg])
+            self.stateMgr.sim(
+                self.stateMgr[reg], self.viewRegisters.symRegs[reg])
 
         # Start exploration
-        print("[angr-cutter]: Starting exploration with find (%s) and avoid (%s)" %
-                (self.findAddrs, self.avoidAddrs,))
-        print("[angr-cutter]: Symbolics are: " + str(self.stateMgr.symbolics))
+        printMessage("Starting exploration with find (%s) and avoid (%s)" %
+                     (self.findAddrs, self.avoidAddrs,), LogLevel.INFO)
+        printMessage("Symbolics are: " +
+                     str(self.stateMgr.symbolics), LogLevel.INFO)
         self.simMgr.explore(find=self.findAddrs, avoid=self.avoidAddrs)
 
         # Attempt to print the results
         if len(self.simMgr.found):
-            print("[angr-cutter]: Found: " + str(self.simMgr.found[0]))
+            printMessage("Found: " + str(self.simMgr.found[0]), LogLevel.INFO)
 
             conc = self.stateMgr.concretize(self.simMgr.found[0])
             for addr in conc:
-                print("[angr-cutter] 0x%x ==> %s" % (addr, repr(conc[addr])))
+                printMessage("0x%x ==> %s" %
+                             (addr, repr(conc[addr])), LogLevel.INFO)
 
             self.applySimButton.setDisabled(False)
         else:
-            print("[angr-cutter]: Failed to find a state")
+            printMessage("Failed to find a state", LogLevel.ERROR)
             self.applySimButton.setDisabled(True)
 
         # Synchronize displays
         cutter.core().refreshAll.emit()
-    
+
     def debugStateChanged(self):
         # Calculate the diff based on the previous baddr
         baddr = int(cutter.cmd("e bin.baddr").strip('\n'), 16)
@@ -208,7 +237,7 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
             disableUi = True
             # applySim can be enabled only after startExplore
             self.applySimButton.setDisabled(True)
- 
+
         # Enable exploration action when in debug mode
         self.startButton.setDisabled(disableUi)
         self.stopButton.setDisabled(disableUi)
@@ -223,7 +252,7 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
         for addr in self.avoidAddrs:
             tmp.append(addr + diff)
         self.avoidAddrs = tmp
- 
+
         tmp = {}
         for addr in self.symAddrs:
             tmp[addr + diff] = self.symAddrs[addr]
