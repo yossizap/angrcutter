@@ -156,6 +156,8 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
         self.stateMgr.to_dbg(self.simMgr.found[0])
         # Synchronize all widgets with the applied memory/register values
         cutter.core().refreshAll.emit()
+        # Return to the previous seek
+        cutter.cmd("s %d" % cutter.core().getProgramCounterValue())
 
     def startExplore(self):
         if len(self.findAddrs) == 0:
@@ -192,6 +194,8 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
 
         # Synchronize displays
         cutter.core().refreshAll.emit()
+        # Return to the previous seek
+        cutter.cmd("s %d" % cutter.core().getProgramCounterValue())
     
     def debugStateChanged(self):
         # Calculate the diff based on the previous baddr
