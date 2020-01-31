@@ -83,23 +83,19 @@ class AngrWidget(cutter.CutterDockWidget, Ui_AngrWidget):
         self.symAddrAction = QAction("Angr - symbolize address", self)
         self.unsetAddrAction = QAction("Angr - unset address", self)
 
-        cutter.core().addContextMenuExtensionAction(
-            cutter.CutterCore.ContextMenuType.Disassembly, self.findAddrAction)
-        cutter.core().addContextMenuExtensionAction(
-            cutter.CutterCore.ContextMenuType.Disassembly, self.avoidAddrAction)
-        cutter.core().addContextMenuExtensionAction(
-            cutter.CutterCore.ContextMenuType.Disassembly, self.symAddrAction)
-        cutter.core().addContextMenuExtensionAction(
-            cutter.CutterCore.ContextMenuType.Disassembly, self.unsetAddrAction)
-        cutter.core().addContextMenuExtensionSeparator(
-            cutter.CutterCore.ContextMenuType.Disassembly)
+        # Disassembly menu actions
+        menu = self.main.getContextMenuExtensions(cutter.MainWindow.ContextMenuType.Disassembly)
+        menu.addAction(self.findAddrAction)
+        menu.addAction(self.avoidAddrAction)
+        menu.addAction(self.symAddrAction)
+        menu.addAction(self.unsetAddrAction)
+        menu.addSeparator()
 
-        cutter.core().addContextMenuExtensionAction(
-            cutter.CutterCore.ContextMenuType.Addressable, self.symAddrAction)
-        cutter.core().addContextMenuExtensionAction(
-            cutter.CutterCore.ContextMenuType.Addressable, self.unsetAddrAction)
-        cutter.core().addContextMenuExtensionSeparator(
-            cutter.CutterCore.ContextMenuType.Addressable)
+        # Addressable menu actions
+        menu = self.main.getContextMenuExtensions(cutter.MainWindow.ContextMenuType.Addressable)
+        menu.addAction(self.symAddrAction)
+        menu.addAction(self.unsetAddrAction)
+        menu.addSeparator()
 
         self.findAddrAction.triggered.connect(self.setFindAddr)
         self.avoidAddrAction.triggered.connect(self.setAvoidAddr)
